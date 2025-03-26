@@ -1,5 +1,6 @@
 name: Daily Stock Report
 
+# This tells GitHub Actions to trigger the workflow at 9 AM every day
 on:
   schedule:
     - cron: '0 7 * * *'  # Runs at 09:00 AM CET (UTC+2) every day
@@ -7,9 +8,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Linux operating system as runner environment
     permissions:
-      contents: write
+      contents: write     # Add permission to write to repository
 
     steps:
       # Step 1: Check out the repository
@@ -23,6 +24,7 @@ jobs:
           python-version: '3.x'
 
       # Step 3: Install dependencies
+      - name: Install dependencies
         run: |
           pip install ffn pandas matplotlib plotly
           pip install jupyter notebook nbformat pyyaml ipykernel
@@ -30,14 +32,6 @@ jobs:
       # Step 4: Run the Python script to generate CSV
       - name: Run extract_data.py
         run: python extract_data.py
-
-      # Step 5: Configure Git and commit data files
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data/*.csv
-          git commit -m "Update stock data $(date +'%Y-%m-%d')"
-          git push
 
       # Step 6: Set up Quarto
       - name: Set up Quarto
@@ -47,10 +41,14 @@ jobs:
       - name: Render Quarto Project
         run: quarto render
 
-      # Step 8: Commit rendered Quarto site
+      # Step 8: Configure Git and commit changes
+      - name: Configure Git and Push Changes
         run: |
-          git add docs/*
-          git commit -m "Update rendered site $(date +'%Y-%m-%d')"
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/*.csv
+          git add docs/*  # Add the rendered Quarto site in docs folder
+          git commit -m "Update stock data and plot $(date +'%Y-%m-%d')"
           git push
 
       # Step 9: Upload CSV as artifacts (as backup)
