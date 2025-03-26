@@ -1,0 +1,71 @@
+---
+title: "Top Tech Stocks Report"
+format:
+  html:
+    code-fold: true
+    toc: false
+jupyter: python3
+---
+Author: Martin Wong @ [Autonomous Econ](https://autonomousecon.substack.com/)<br>
+This is a demo site built using Quarto and Python. **Check out<br>the 
+full Substack post [here](https://open.substack.com/pub/autonomousecon/p/how-the-pros-showcase-their-data?r=2o1mc&utm_campaign=post&utm_medium=web).**
+
+```{python}
+from datetime import datetime
+
+# Display last update time
+current_time = datetime.now().strftime("%d-%m-%Y %H:%M")
+print(f"Last updated: {current_time}")
+```
+
+```{python}
+#| label: fig-Tech-Stocks
+
+import ffn
+import pandas as pd
+import plotly.graph_objects as go
+from datetime import datetime
+
+
+# Function for generating the interactive plot
+def plot_stock_timeseries_interactive(df):
+    """
+    Creates a simple interactive Plotly plot for all columns in the DataFrame.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame with float columns and DatetimeIndex as index.
+    """
+    fig = go.Figure()
+
+    for col in df.columns:
+        fig.add_trace(
+            go.Scatter(
+                x=df.index,
+                y=df[col],
+                mode="lines",
+                name=col,
+                hovertemplate="%{x|%Y-%m-%d}<br>%{y:.2f}<extra></extra>",
+            )
+        )
+
+    fig.update_layout(
+        title="Top tech stocks indexed to 2023-01-01=100",
+        xaxis_title="",
+        yaxis_title="",
+        template="plotly_dark",
+    )
+
+    fig.show()
+
+# Load latest file
+timestamp = datetime.now().strftime("%Y-%m-%d")
+data_rebase = pd.read_csv(
+    f"data/stock_data_{timestamp}.csv", index_col=0, parse_dates=True
+)
+
+# Step 3: Generate interactive plot
+fig = plot_stock_timeseries_interactive(data_rebase)
+
+```
+
+
